@@ -1,6 +1,6 @@
 import Caver from 'caver-js';
 import CounterABI from '../abi/CounterABI.json';
-import { ACCESS_KEY_ID, SECRET_KEY_ID, COUNT_COUNTRACT_ADDRESS, CHAIN_ID} from '../constants';
+import { ACCESS_KEY_ID, SECRET_KEY_ID, COUNT_CONTRACT_ADDRESS, CHAIN_ID} from '../constants';
 const option = {
     headers: [
       {
@@ -12,7 +12,7 @@ const option = {
   }
   
   const caver = new Caver(new Caver.providers.HttpProvider("https://node-api.klaytnapi.com/v1/klaytn", option));
-  const CountContract = new caver.contract(CounterABI, COUNT_COUNTRACT_ADDRESS);
+  const CountContract = new caver.contract(CounterABI, COUNT_CONTRACT_ADDRESS);
   
   export const readCount =() =>{
     const _count = CountContract.methods.count().call();

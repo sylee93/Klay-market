@@ -17,6 +17,7 @@ const onPressButton2 = (_balance,_setBalance) => {
   _setBalance(_balance);
 }
 const DEFAULT_QR_CODE = "DEFAULT";
+
 function App() {
   const [balance, setBalance] = useState('0');
   const [qrvalue, setQrvalue] = useState(DEFAULT_QR_CODE);
@@ -25,16 +26,24 @@ function App() {
   const onClickGetAddress = () => {
     KlipAPI.getAddress(setQrvalue);
   };
+  const onClickSetCount = () => {
+    KlipAPI.setCount(2000,setQrvalue);
+  };
   return (
     <div className="App">
       <header className="App-header">
         <button onClick={()=>{
-          //onPressButton2('15', setBalance)
           onClickGetAddress();
-          }}>주소 가져오기</button>
-          <br/>
-          <br/>
-          <br/>
+          }}>주소 가져오기
+        </button>
+          
+        <button onClick={()=>{
+          onClickSetCount();
+          }}>카운트 값 변경
+        </button>
+        <br/>
+        <br/>
+        <br/>
           <QRcode value={qrvalue}/>
         <p>
           {balance}
