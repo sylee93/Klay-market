@@ -1,12 +1,13 @@
 import React, {useState} from 'react';
 import logo from './logo.svg';
 import QRcode from "qrcode.react";
-import {getBalance, readCount, setCount} from './api/UseCaver.js';
+import {fetchCardsOf, getBalance, readCount, setCount} from './api/UseCaver.js';
 import "bootstrap/dist/css/bootstrap.min.css";
 import './App.css';
 import './market.css';
 import * as KlipAPI from "./api/UseKlip";
-import { Alert, Container } from "react-bootstrap";
+import { Alert, Card, Container } from "react-bootstrap";
+import { MARKET_CONTRACT_ADDRESS } from './constants';
 
 // 1 Smart contract 배포 주소 파악(가져오기)
 // 2 caver.js 이용해서 스마트 컨트랙트 연동하기
@@ -28,7 +29,7 @@ function App() {
   // gloval data
   // address
   // nft
-  const [nfts, setNFTs] = useState([]);
+  const [nfts, setNFTs] = useState([]); // {tokenId:'101', tokenUri: ''}
   const [myBalance, setMyBalance] = useState('0');
   const [myAddress, setMyAddress] = useState('0x00000000000000000000000000000');
 
@@ -40,7 +41,16 @@ function App() {
   // Modal
   
   // fetchMarketNFTs
+  const fetchMarketNFTs = async () => {
+    const _nfts = await fetchCardsOf(MARKET_CONTRACT_ADDRESS);
+    setNFTs(_nfts);
+  }
   // fetchMyNFTs
+  const fetchMyNFTs = async () => {
+    const _nfts = await fetchCardsOf(myAddress);
+    setNFTs(_nfts);
+  }
+
   // onclickMint
   // onClickMyCard
   // onClickMarketCard
@@ -75,6 +85,14 @@ function App() {
           >
             {myBalance}
           </Alert>
+
+          {/* 갤러리(마켓, 내 지갑) */}
+
+          <div className="container" style={{padding:0, width:"100%"}}>
+            {nfts.map((nft, index) => (
+              <Card.Img className="img-responsive" src={nfts[index].uri} />
+            ))}
+          </div>
         </div>
         {/* 주소 잔고 */}
         <Container 
@@ -87,7 +105,10 @@ function App() {
         >   
         <QRcode value={qrvalue} /> 
         </Container>
-        {/* 갤러리(마켓, 내 지갑) */}
+        <button onClick={fetchMyNFTs}>
+          NFT 가져오기
+        </button>
+        
         {/* 발행 페이지 */}
         {/* 탭 */}
         {/* 모다류 */}
