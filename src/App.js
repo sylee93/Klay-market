@@ -1,12 +1,11 @@
 import React, {useState} from 'react';
-import logo from './logo.svg';
 import QRcode from "qrcode.react";
-import {fetchCardsOf, getBalance, readCount, setCount} from './api/UseCaver.js';
+import {fetchCardsOf, getBalance} from './api/UseCaver.js';
 import "bootstrap/dist/css/bootstrap.min.css";
 import './App.css';
 import './market.css';
 import * as KlipAPI from "./api/UseKlip";
-import { Alert, Card, Container } from "react-bootstrap";
+import { Alert, Card, Container, Nav, Form, Button } from "react-bootstrap";
 import { MARKET_CONTRACT_ADDRESS } from './constants';
 
 // 1 Smart contract 배포 주소 파악(가져오기)
@@ -30,11 +29,13 @@ function App() {
   // address
   // nft
   const [nfts, setNFTs] = useState([]); // {tokenId:'101', tokenUri: ''}
-  const [myBalance, setMyBalance] = useState('0');
-  const [myAddress, setMyAddress] = useState('0x00000000000000000000000000000');
+  const [myBalance, setMyBalance] = useState("0");
+  const [myAddress, setMyAddress] = useState(DEFAULT_ADDRESS);
 
   // UI
   const [qrvalue, setQrvalue] = useState(DEFAULT_QR_CODE);
+  const [tab, setTab] = useState("MINT") // MARKET, MINT, WALLET
+  const [mintImageUrl, setMintImageUrl] = useState("");
   // tab
   // mintInput
 
@@ -52,6 +53,13 @@ function App() {
   }
 
   // onclickMint
+  const onClickMint = async (uri) => {
+    if(myAddress === DEFAULT_ADDRESS) alert("NO ADDRESS");
+    const randomTokenId = parseInt(Math.random() * 1000000);
+    KlipAPI.mintCardWithURI(myAddress, randomTokenId, uri, setQrvalue, (result) => {
+      alert(JSON.stringify(result));
+    });
+  };
   // onClickMyCard
   // onClickMarketCard
   
@@ -66,6 +74,7 @@ function App() {
   return (
     <div className="App">
         <div style={{backgroundColor: "black", padding:10}}>
+          {/* 주소 잔고 */}
           <div
             style={{
               fontSize: 30,
@@ -85,33 +94,98 @@ function App() {
           >
             {myBalance}
           </Alert>
-
+          <Container 
+            style={{
+              backgroundColor:"white",
+              width: 300,
+              height: 300,
+              padding: 20,
+            }}
+          >   
+          <QRcode value={qrvalue} size={256} style={{margin: "auto"}}/> 
+          </Container>
           {/* 갤러리(마켓, 내 지갑) */}
-
-          <div className="container" style={{padding:0, width:"100%"}}>
-            {nfts.map((nft, index) => (
-              <Card.Img className="img-responsive" src={nfts[index].uri} />
-            ))}
+          {tab === "MARKET" || tab === "WALLET" ? (
+            <div className="container" style={{padding:0, width:"100%"}}>
+              {nfts.map((nft, index) => (
+                <Card.Img className="img-responsive" src={nfts[index].uri} />
+              ))}
           </div>
+          ) : null}
+          {/* 발행 페이지 */}
+          {tab === "MINT" ? (
+            <div className="container" style={{padding:0, width:"100%"}}>
+              <Card className="text-center" style={{color: "black", height:"50%", borderColor: "#C5B35B"}}>
+                  <Card.Body style={{ opacity: 0.9, backgroundColor: "black"}}>
+                    {mintImageUrl !== "" ? (
+                      <Card.Img src={mintImageUrl} height={"50%"} />
+                    ) : null}
+                    <Form>
+                      <Form.Group>
+                        <Form.Control 
+                          value={mintImageUrl}
+                          onChange={(e)=> {
+                            console.log(e.target.value);
+                            setMintImageUrl(e.target.value);
+                          }}
+                          type="text"
+                          placeholder="이미지 주소를 입력해주세요"
+                        />
+                      </Form.Group>
+                      <br/>
+                      <Button
+                        onClick={() => {
+                          onClickMint(mintImageUrl);
+                        }}
+                        variant="primary"
+                        style={{
+                          backgroundColor:"#810034", 
+                          borderColor:"#810034"
+                        }}
+                      >
+                        발행하기
+                      </Button>
+                    </Form>
+                  </Card.Body>
+              </Card>
+            </div>
+          ) : null}
         </div>
-        {/* 주소 잔고 */}
-        <Container 
-          style={{
-            backgroundColor:"white",
-            width: 172,
-            height: 172,
-            padding: 20,
-          }}
-        >   
-        <QRcode value={qrvalue} /> 
-        </Container>
+
         <button onClick={fetchMyNFTs}>
           NFT 가져오기
         </button>
-        
-        {/* 발행 페이지 */}
+
+        {/* 모달 */}
         {/* 탭 */}
-        {/* 모다류 */}
+        <nav style={{backgroundColor: "#1b1717", height: 45 }} className="navbar fixed-bottom navbar-light" role="navigation">
+          <Nav className="w-100">
+            <div className='d-flex flex-row justify-content-around w-100'>
+              <div onClick={()=>{
+                setTab("MARKET");
+                fetchMarketNFTs();
+              }}
+                className="row d-flex flex-column justify-content-center align-items-center">
+              </div>
+              <div>MARKET</div>
+
+              <div onClick={()=>{
+                setTab("MINT");
+              }}
+                className="row d-flex flex-column justify-content-center align-items-center">
+              </div>
+              <div>MINT</div>
+              
+              <div onClick={()=>{
+                setTab("WALLET");
+                fetchMyNFTs();
+              }}
+                className="row d-flex flex-column justify-content-center align-items-center">
+              </div>
+              <div>WALLET</div>
+            </div>
+          </Nav>
+        </nav>
     </div>
   );
 }
