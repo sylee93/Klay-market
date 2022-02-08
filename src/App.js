@@ -28,9 +28,10 @@ function App() {
   // gloval data
   // address
   // nft
-  const [nfts, setNFTs] = useState([]); // {tokenId:'101', tokenUri: ''}
+  const [nfts, setNFTs] = useState([]); // {id:'101', uri: ''}
   const [myBalance, setMyBalance] = useState("0");
-  const [myAddress, setMyAddress] = useState(DEFAULT_ADDRESS);
+  //const [myAddress, setMyAddress] = useState(DEFAULT_ADDRESS);
+  const [myAddress, setMyAddress] = useState("0xF0992F6ee1A2Fbb7156444a8a5FB30d6600Dd631");
 
   // UI
   const [qrvalue, setQrvalue] = useState(DEFAULT_QR_CODE);
@@ -60,9 +61,28 @@ function App() {
       alert(JSON.stringify(result));
     });
   };
-  // onClickMyCard
-  // onClickMarketCard
-  
+
+  const onClickCard = (id) => {
+    if(tab === 'WALLET'){
+      onClickMyCard(id);
+    }
+    if(tab === 'MARKET'){
+      onClickMarketCard(id);
+    }
+  };
+
+  const onClickMyCard = (tokenId) => {
+    KlipAPI.listingCard(myAddress, tokenId, setQrvalue, (result)=>{
+      alert(JSON.stringify(result));
+    });
+  };
+
+  const onClickMarketCard = (tokenId) => {
+    KlipAPI.buyCard(tokenId, setQrvalue, (result)=>{
+      alert(JSON.stringify(result));
+    });
+  };
+
   const getUserData = () => {
     KlipAPI.getAddress(setQrvalue, async (address) => {
       setMyAddress(address);
@@ -108,7 +128,14 @@ function App() {
           {tab === "MARKET" || tab === "WALLET" ? (
             <div className="container" style={{padding:0, width:"100%"}}>
               {nfts.map((nft, index) => (
-                <Card.Img className="img-responsive" src={nfts[index].uri} />
+                <Card.Img 
+                  key={`imagekey${index}`}
+                  onClick={()=>{
+                  onClickCard(nft.id);
+                }}
+                className="img-responsive"
+                 src={nfts[index].uri} 
+                />
               ))}
           </div>
           ) : null}
@@ -152,9 +179,6 @@ function App() {
           ) : null}
         </div>
 
-        <button onClick={fetchMyNFTs}>
-          NFT 가져오기
-        </button>
 
         {/* 모달 */}
         {/* 탭 */}
@@ -166,23 +190,23 @@ function App() {
                 fetchMarketNFTs();
               }}
                 className="row d-flex flex-column justify-content-center align-items-center">
+                <div>MARKET</div>
               </div>
-              <div>MARKET</div>
 
               <div onClick={()=>{
                 setTab("MINT");
               }}
                 className="row d-flex flex-column justify-content-center align-items-center">
+                <div>MINT</div>
               </div>
-              <div>MINT</div>
-              
+
               <div onClick={()=>{
                 setTab("WALLET");
                 fetchMyNFTs();
               }}
                 className="row d-flex flex-column justify-content-center align-items-center">
+                <div>WALLET</div>
               </div>
-              <div>WALLET</div>
             </div>
           </Nav>
         </nav>
